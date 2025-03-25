@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Full Quiz Application</title>
+  <meta charset="UTF-8">
+  <title>Full Quiz (Ordered List for Q3)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -58,37 +58,31 @@
     canvas {
       border: 1px solid #000;
     }
-    .checkbox-group,
-    .ordering-group {
+    .checkbox-group {
       margin: 10px 0;
-    }
-    .ordering-group {
-      border: 1px solid #aaa;
-      padding: 10px;
-      border-radius: 4px;
-      background-color: #fff;
-      min-height: 100px;
-      margin-top: 10px;
-    }
-    .ordering-item {
-      padding: 8px;
-      margin: 4px 0;
-      background: #eee;
-      cursor: move;
-      border: 1px solid #ccc;
-    }
-    .drag-over {
-      border: 2px dashed #000;
-    }
-    /* Add a dragging class for visual feedback */
-    .dragging {
-      opacity: 0.5;
     }
     .timer {
       font-size: 26px;
       font-weight: bold;
       text-align: center;
       margin-bottom: 20px;
+    }
+    /* Q3 - Ordered List Approach */
+    .ordered-list-group {
+      margin: 10px 0;
+      border: 1px solid #aaa;
+      padding: 10px;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    .ordered-item-row {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+    }
+    .ordered-item-row select {
+      margin-left: 10px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -98,7 +92,8 @@
     <div id="startDialog" class="start-dialog">
       <h2>Welcome to the Test</h2>
       <p>
-        Please note: The quiz has three parts. Q3 (Barista Tasks Ordering) will be shown first, followed by Q1 (Global Client Audit) and then Q2 (Football Tournament Data).
+        This quiz has three parts. The first question (Q3) is the Barista Tasks Ordering (with a dropdown list),
+        followed by Q1 (Global Client Audit), and then Q2 (Football Tournament Data).
       </p>
       <input type="text" id="usernameInput" placeholder="Enter your name" />
       <button id="startBtn" class="btn">Submit</button>
@@ -133,38 +128,42 @@
     const quizStartTime = new Date();
     const logEntries = []; // Full log for all questions
 
-    // Define questions with Q3 first, then Q1, then Q2.
+    // Q3 first, Q1 second, Q2 third
     const questions = (function() {
-      // Q3: Barista Tasks Ordering
-      const explanationQ3 = "You’re covering for a barista who left a voicemail:\n\n" +
-        "“Hey! Thanks for helping out. First, check today’s delivery slip—it’s in the top drawer (code: 1122). " +
-        "After restocking cups, check the whiteboard for custom orders. If there’s a ‘machine maintenance’ alert, " +
-        "prioritize it over custom orders. Once done, lock the cash register, refill the sugar jars, and text me a summary. " +
-        "Oh, and refill the sugar jars after locking up! Don’t forget!”\n\n" +
+      // Q3: Barista Tasks, now with dropdown ordering
+      const explanationQ3 = "You are covering for a coworker who is out on leave. " +
+        "Your coworker has left you a voicemail message specifying the tasks you will need to do for them.\n\n" +
+        "“Hi there! Thanks so much for covering for me. So here is what you need to do: Complete the monthly review spreadsheet. " +
+        "You can do that by looking up the latest all revenue in the reporting room downstairs. Then, check all email requests, " +
+        "because there are a few new ones that came in. If there are any requests from the executives, prioritize those first " +
+        "unless you have an emergency request from another department. Once you are done with fulfilling requests, please water " +
+        "any plants you see in front of the computer. Oh, wait, I should have mentioned a couple of things: you have to log in " +
+        "with manager access in order to open that spreadsheet, so let me know and I can update email right after you finish " +
+        "handling the requests. Ok, thanks again. This is a big help! I owe you lunch next time.”\n\n" +
         "Place the tasks in the correct order:";
-
       const stepsQ3 = [
-        "Unlock drawer (code: 1122)",
-        "Check delivery slip",
-        "Restock cups",
-        "Review whiteboard orders",
-        "Fix machine alerts (if any)",
-        "Handle custom orders",
-        "Lock cash register",
-        "Refill sugar jars",
-        "Send summary text"
+        "Complete the spreadsheet",
+        "Log in with manager access",
+        "Check all email requests",
+        "Handle exec requests first",
+        "Fulfill emergency requests",
+        "Water any plants",
+        "Send update email",
+        "Turn off computer",
+        "Lock up"
       ];
+      // We'll store the correct order as stepsQ3 in index form 0..8
       const q3 = {
-        question: "Barista Tasks Ordering",
+        question: "Question 1 of 3\nAttention to Detail",
         explanation: explanationQ3,
-        type: "ordering",
+        type: "ordered_dropdown",
         time: 270,
         steps: stepsQ3
       };
 
       // Q1: Global Client Audit (Y/N Sub-Questions)
       const q1 = {
-        question: "Global Client Audit",
+        question: "Question 2 of 3: Global Client Audit",
         instructions: "Mark Y (Match) or N (Mismatch) for each sub-item.",
         type: "y_n_subq",
         time: 120,
@@ -206,7 +205,7 @@
         ["24", "yes", "G-4,0", "12", "20"]
       ];
       const q2 = {
-        question: "Football Tournament Data",
+        question: "Question 3 of 3: Football Tournament Data",
         instructions: "Below are two reports showing performance data for 7 players. Select the players with inconsistent data.",
         type: "checkbox_image",
         time: 240,
@@ -216,11 +215,12 @@
         reports: { report1, report2 }
       };
 
+      // Return in the order Q3, Q1, Q2
       return [q3, q1, q2];
     })();
 
     /***********************
-     * 2. Utility & Timer Functions
+     * 2. Utility & Timer
      ***********************/
     function startTimer(duration, display, onTimeUp) {
       remainingTime = duration;
@@ -242,33 +242,26 @@
       clearInterval(timerInterval);
       const questionContainer = document.getElementById("questionContainer");
       questionContainer.innerHTML = "";
-
       if (currentQuestionIndex >= questions.length) {
         endQuiz();
         return;
       }
-
       const qdata = questions[currentQuestionIndex];
       document.getElementById("timerDisplay").textContent = "Time: " + qdata.time;
 
-      // Build question UI container
       const qElem = document.createElement("div");
       qElem.className = "question";
 
-      // Question Title
+      // Title, explanation, instructions
       const qTitle = document.createElement("h3");
       qTitle.innerText = qdata.question;
       qElem.appendChild(qTitle);
-
-      // Explanation paragraph (if provided)
       if (qdata.explanation) {
         const expl = document.createElement("p");
         expl.className = "explanation";
         expl.innerText = qdata.explanation;
         qElem.appendChild(expl);
       }
-
-      // Instructions (if provided)
       if (qdata.instructions) {
         const instr = document.createElement("p");
         instr.className = "explanation";
@@ -277,51 +270,48 @@
       }
 
       // Render based on question type
-      if (qdata.type === "ordering") {
-        // Ordering question UI (only for Q3)
-        const orderingHeading = document.createElement("h4");
-        orderingHeading.innerText = "Drag and drop the tasks in the correct order:";
-        qElem.appendChild(orderingHeading);
+      if (qdata.type === "ordered_dropdown") {
+        // Q3 approach: each step has a dropdown for ordering
+        // We'll shuffle the steps for display
+        const stepsShuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "ordered-list-group";
 
-        const listContainer = document.createElement("div");
-        listContainer.className = "ordering-group";
-        const list = document.createElement("ul");
-        list.id = "orderingList";
-        list.style.listStyleType = "none";
-
-        // Shuffle steps for a random initial order
-        const shuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
-        shuffled.forEach(step => {
-          const li = document.createElement("li");
-          li.innerText = step;
-          li.className = "ordering-item";
-          li.setAttribute("draggable", "true");
-          list.appendChild(li);
+        stepsShuffled.forEach((stepText, i) => {
+          const row = document.createElement("div");
+          row.className = "ordered-item-row";
+          const label = document.createElement("label");
+          label.innerText = stepText;
+          // Create a dropdown with 1..n
+          const select = document.createElement("select");
+          select.name = "orderSelect";
+          // We'll have 1.. stepsShuffled.length
+          for (let num = 1; num <= stepsShuffled.length; num++) {
+            const opt = document.createElement("option");
+            opt.value = num;
+            opt.innerText = num.toString();
+            select.appendChild(opt);
+          }
+          row.appendChild(label);
+          row.appendChild(select);
+          groupDiv.appendChild(row);
         });
+        qElem.appendChild(groupDiv);
 
-        listContainer.appendChild(list);
-        qElem.appendChild(listContainer);
-
-        // Only call addDragAndDropHandlers() when type is ordering
-        addDragAndDropHandlers();
-      }
-      else if (qdata.type === "y_n_subq") {
-        // Render Y/N sub-questions for Q1
+      } else if (qdata.type === "y_n_subq") {
+        // Q1
         qdata.sub_questions.forEach((subq, idx) => {
           const subDiv = document.createElement("div");
-          subDiv.className = "sub-question";
           const label = document.createElement("label");
           label.innerText = `${subq.item} | Paper: ${subq.paper} | Screen: ${subq.screen}`;
           subDiv.appendChild(label);
           subDiv.appendChild(document.createElement("br"));
-          // Y radio
           const radioY = document.createElement("input");
           radioY.type = "radio";
           radioY.name = "subq" + idx;
           radioY.value = "Y";
           const labelY = document.createElement("label");
           labelY.innerText = " Y ";
-          // N radio
           const radioN = document.createElement("input");
           radioN.type = "radio";
           radioN.name = "subq" + idx;
@@ -334,9 +324,8 @@
           subDiv.appendChild(labelN);
           qElem.appendChild(subDiv);
         });
-      }
-      else if (qdata.type === "checkbox_image") {
-        // Render canvases for Q2
+      } else if (qdata.type === "checkbox_image") {
+        // Q2
         const canvasContainer = document.createElement("div");
         canvasContainer.className = "canvas-container";
         const canvas1 = document.createElement("canvas");
@@ -351,7 +340,6 @@
         canvasContainer.appendChild(canvas2);
         qElem.appendChild(canvasContainer);
 
-        // Render checkboxes for Q2
         const cbGroup = document.createElement("div");
         cbGroup.className = "checkbox-group";
         qdata.options.forEach((option, idx) => {
@@ -366,79 +354,18 @@
         });
         qElem.appendChild(cbGroup);
 
-        // Draw canvases after a short delay to ensure rendering
         setTimeout(() => {
           drawTable("canvas1", qdata.reports.report1);
           drawTable("canvas2", qdata.reports.report2);
         }, 300);
       }
 
-      questionContainer.appendChild(qElem);
+      document.getElementById("questionContainer").appendChild(qElem);
       startTimer(qdata.time, document.getElementById("timerDisplay"), () => submitAnswer(true));
     }
 
     /***********************
-     * 4. Drag-and-Drop Handlers (Only for ordering questions)
-     ***********************/
-    function addDragAndDropHandlers() {
-      const list = document.getElementById("orderingList");
-      if (!list) return;  // Only proceed if the element exists
-      const items = list.querySelectorAll(".ordering-item");
-      items.forEach(item => {
-        item.setAttribute("draggable", "true");
-        item.addEventListener("dragstart", dragStart, false);
-        item.addEventListener("dragover", dragOver, false);
-        item.addEventListener("dragenter", dragEnter, false);
-        item.addEventListener("dragleave", dragLeave, false);
-        item.addEventListener("drop", dragDrop, false);
-        item.addEventListener("dragend", dragEnd, false);
-      });
-    }
-
-    function dragStart(e) {
-      this.classList.add("dragging");
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", this.innerText);
-      // Optionally, set a custom drag image
-      if (e.dataTransfer.setDragImage) {
-        e.dataTransfer.setDragImage(this, 10, 10);
-      }
-    }
-
-    function dragOver(e) {
-      e.preventDefault(); // Necessary. Allows us to drop.
-      e.dataTransfer.dropEffect = "move";
-      return false;
-    }
-
-    function dragEnter(e) {
-      this.classList.add("drag-over");
-    }
-
-    function dragLeave(e) {
-      this.classList.remove("drag-over");
-    }
-
-    function dragDrop(e) {
-      e.stopPropagation();
-      // Swap innerText of the dragged item and the drop target
-      const dragged = document.querySelector(".dragging");
-      if (dragged && dragged !== this) {
-        const temp = dragged.innerText;
-        dragged.innerText = this.innerText;
-        this.innerText = temp;
-      }
-      return false;
-    }
-
-    function dragEnd(e) {
-      this.classList.remove("dragging");
-      const items = document.querySelectorAll(".ordering-item");
-      items.forEach(item => item.classList.remove("drag-over"));
-    }
-
-    /***********************
-     * 5. Canvas Drawing Function (for Q2)
+     * 4. Draw Table for Q2
      ***********************/
     function drawTable(canvasId, data) {
       const canvas = document.getElementById(canvasId);
@@ -460,7 +387,7 @@
     }
 
     /***********************
-     * 6. Submission and Quiz End Functions
+     * 5. Submission Logic
      ***********************/
     function submitAnswer(auto = false) {
       clearInterval(timerInterval);
@@ -469,19 +396,43 @@
       let totalSub = 0;
       let logText = `User: ${username} | Q: ${qdata.question}\n`;
 
-      if (qdata.type === "ordering") {
-        const listItems = document.querySelectorAll("#orderingList li");
-        totalSub = listItems.length;
-        const userOrder = [];
-        listItems.forEach(li => userOrder.push(li.innerText));
-        logText += "User's order:\n";
-        userOrder.forEach((step, i) => { logText += (i + 1) + ". " + step + "\n"; });
-        qdata.steps.forEach((correctStep, idx) => {
-          if (userOrder[idx] === correctStep) subScore++;
+      if (qdata.type === "ordered_dropdown") {
+        // Q3 approach: gather each step's dropdown
+        const groupDiv = document.querySelector(".ordered-list-group");
+        const rows = groupDiv.querySelectorAll(".ordered-item-row");
+        // But we actually didn't store the tasks in the DOM. Instead:
+        // We have qdata.steps as the correct order. We'll find each row's label text
+        // and see which "select" the user chose.
+        const selects = groupDiv.querySelectorAll("select[name='orderSelect']");
+        // We'll store userAnswers in an array of (taskText, userPos)
+        let userAnswers = [];
+        rows.forEach((row, i) => {
+          const label = row.querySelector("label");
+          const stepText = label.innerText.trim();
+          const select = row.querySelector("select");
+          const userPos = parseInt(select.value, 10);
+          userAnswers.push({ stepText, userPos });
+        });
+        // Now we compare. The correct order is the index of the step in qdata.steps + 1
+        // i.e. if qdata.steps[0] is "Complete the spreadsheet", that is position 1
+        // We'll do a map
+        const correctMap = {};
+        qdata.steps.forEach((text, idx) => {
+          correctMap[text] = idx + 1;  // 1-based
+        });
+        totalSub = qdata.steps.length;
+        logText += "User's ordering:\n";
+        userAnswers.forEach(ans => {
+          const correctPos = correctMap[ans.stepText];
+          logText += `${ans.stepText} => userPos: ${ans.userPos}, correctPos: ${correctPos}\n`;
+          if (ans.userPos === correctPos) {
+            subScore++;
+          }
         });
         logText += `Score: ${subScore} / ${totalSub}\n`;
-      }
-      else if (qdata.type === "y_n_subq") {
+
+      } else if (qdata.type === "y_n_subq") {
+        // Q1
         qdata.sub_questions.forEach((subq, idx) => {
           totalSub++;
           const radios = document.getElementsByName("subq" + idx);
@@ -491,19 +442,20 @@
           if (answer === subq.correct) subScore++;
         });
         logText += `Score: ${subScore} / ${totalSub}\n`;
-      }
-      else if (qdata.type === "checkbox_image") {
-        // For Q2, we want a maximum score of 4.
-        totalSub = qdata.correct_indices.length;
+
+      } else if (qdata.type === "checkbox_image") {
+        // Q2
+        totalSub = qdata.correct_indices.length; // 4
         const checkboxes = document.querySelectorAll(".checkbox-group input[type='checkbox']");
         const userIndices = [];
-        checkboxes.forEach(cb => { if (cb.checked) userIndices.push(parseInt(cb.value)); });
+        checkboxes.forEach(cb => {
+          if (cb.checked) userIndices.push(parseInt(cb.value));
+        });
         logText += `User selected: ${userIndices}\n`;
         logText += `Correct: ${qdata.correct_indices}\n`;
+        // If the user's selection exactly matches the correct indices, full points
         if (arraysEqual(userIndices.sort(), qdata.correct_indices.slice().sort())) {
           subScore = totalSub;
-        } else {
-          subScore = 0;
         }
         logText += `Score: ${subScore} / ${totalSub}\n`;
       }
@@ -512,7 +464,7 @@
       logEntries.push(logText);
       currentQuestionIndex++;
 
-      // Fade transition effect before loading next question or ending quiz
+      // Fade-out, load next
       const quizSection = document.getElementById("quizSection");
       quizSection.style.opacity = 1;
       let fadeOut = setInterval(() => {
@@ -520,7 +472,7 @@
           quizSection.style.opacity -= 0.1;
         } else {
           clearInterval(fadeOut);
-          loadQuestion();  // If no more questions, this triggers endQuiz()
+          loadQuestion(); // If no more questions, calls endQuiz()
           let fadeIn = setInterval(() => {
             if (quizSection.style.opacity < 1) {
               quizSection.style.opacity = parseFloat(quizSection.style.opacity) + 0.1;
@@ -539,14 +491,15 @@
     }
 
     /***********************
-     * 7. End Quiz
+     * 6. End Quiz (Send Log to Sheets)
      ***********************/
     function endQuiz() {
       clearInterval(timerInterval);
       document.getElementById("quizSection").style.display = "none";
       const resultSection = document.getElementById("resultSection");
+      // Calculate total possible
       const totalPossible = questions.reduce((acc, q) => {
-        if (q.type === "ordering") return acc + q.steps.length;
+        if (q.type === "ordered_dropdown") return acc + q.steps.length;
         if (q.type === "y_n_subq") return acc + q.sub_questions.length;
         if (q.type === "checkbox_image") return acc + q.correct_indices.length;
         return acc;
@@ -556,14 +509,46 @@
       document.getElementById("resultMessage").innerText = finalScoreText;
       resultSection.style.display = "block";
       console.log("Quiz Completed! " + finalScoreText);
-      // Optionally: send log data to Google Sheets here.
+
+      // Send the full log to Google Sheets
+      sendLogToSheet(username, logEntries.join("\n"), score, totalPossible);
     }
 
     /***********************
-     * 8. Helper: Array Equality
+     * 7. Helper: Array Equality
      ***********************/
     function arraysEqual(a, b) {
       return a.length === b.length && a.every((v, i) => v === b[i]);
+    }
+
+    /***********************
+     * 8. Google Sheets Connection
+     *    Replace with your real Google Apps Script Web App URL
+     ***********************/
+    const sheetURL = "https://script.google.com/macros/s/AKfycbwpsif4SjjUkKj4qbMlsneRMt7O2_HS-PR42E--uwN0faWHAZDpwyROaG7G2GwtJTqgzg/exec";
+
+    function sendLogToSheet(user, logData, finalScore, totalPossible) {
+      const payload = {
+        username: user,
+        log: logData,
+        finalScore: finalScore,
+        totalPossible: totalPossible,
+        timestamp: new Date().toISOString()
+      };
+      fetch(sheetURL, {
+        method: "POST",
+        mode: "no-cors", // or "cors" if your script returns CORS headers
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        console.log("Log sent to Google Sheet:", response);
+      })
+      .catch(error => {
+        console.error("Error sending log to sheet:", error);
+      });
     }
 
     /***********************
