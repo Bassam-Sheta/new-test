@@ -149,7 +149,7 @@
         "Send summary text"
       ];
       const q3 = {
-        question: "Barista Tasks Ordering",
+        question: "Q3: Barista Tasks Ordering",
         explanation: explanationQ3,
         type: "ordering",
         time: 270,
@@ -158,7 +158,7 @@
 
       // Q1: Global Client Audit (Y/N Sub-Questions)
       const q1 = {
-        question: "Global Client Audit",
+        question: "Q1: Global Client Audit",
         instructions: "Mark Y (Match) or N (Mismatch) for each sub-item.",
         type: "y_n_subq",
         time: 120,
@@ -200,7 +200,7 @@
         ["24", "yes", "G-4,0", "12", "20"]
       ];
       const q2 = {
-        question: "Football Tournament Data",
+        question: "Q2: Football Tournament Data",
         instructions: "Below are two reports showing performance data for 7 players. Select the players with inconsistent data.",
         type: "checkbox_image",
         time: 240,
@@ -252,19 +252,20 @@
       qTitle.innerText = qdata.question;
       qElem.appendChild(qTitle);
 
-      // Explanation (if provided) – convert newlines to line breaks
+      // Explanation (if provided) – convert \n to <br>
       if (qdata.explanation) {
         const expl = document.createElement("p");
         expl.className = "explanation";
-        expl.innerText = qdata.explanation;
+        // Replace newlines with <br>
+        expl.innerHTML = qdata.explanation.replace(/\n/g, '<br>');
         qElem.appendChild(expl);
       }
       
-      // Instructions (if provided)
+      // Instructions (if provided) – also convert \n to <br>
       if (qdata.instructions) {
         const instr = document.createElement("p");
         instr.className = "explanation";
-        instr.innerText = qdata.instructions;
+        instr.innerHTML = qdata.instructions.replace(/\n/g, '<br>');
         qElem.appendChild(instr);
       }
       
@@ -389,6 +390,7 @@
     function addDragAndDropHandlers() {
       const list = document.getElementById("orderingList");
       let dragSrcEl = null;
+
       function handleDragStart(e) {
         dragSrcEl = this;
         e.dataTransfer.effectAllowed = "move";
@@ -418,6 +420,7 @@
         const items = list.querySelectorAll(".ordering-item");
         items.forEach(item => item.classList.remove("drag-over"));
       }
+
       const items = list.querySelectorAll(".ordering-item");
       items.forEach(item => {
         item.addEventListener("dragstart", handleDragStart, false);
@@ -457,6 +460,7 @@
         checkboxes.forEach(cb => { if (cb.checked) userIndices.push(parseInt(cb.value)); });
         logText += "User selected: " + userIndices + "\n";
         logText += "Correct: " + qdata.correct_indices + "\n";
+        // Compare sorted arrays
         if (arraysEqual(userIndices.sort(), qdata.correct_indices.slice().sort())) {
           subScore = totalSub;
         }
@@ -529,9 +533,9 @@
 
     /***********************
      * 7. Log Submission to Google Sheet
-     *    (Replace the placeholder URL with your actual Google Apps Script Web App URL)
+     *    (Replace with your actual Google Apps Script Web App URL if needed)
      ***********************/
-    const sheetURL = "https://script.google.com/macros/s/AKfycbwpsif4SjjUkKj4qbMlsneRMt7O2_HS-PR42E--uwN0faWHAZDpwyROaG7G2GwtJTqgzg/exec"; // <-- Replace with your URL
+    const sheetURL = "https://script.google.com/macros/s/AKfycbwpsif4SjjUkKj4qbMlsneRMt7O2_HS-PR42E--uwN0faWHAZDpwyROaG7G2GwtJTqgzg/exec";
 
     function sendLogToSheet(user, logData, finalScore, totalPossible) {
       const payload = {
@@ -541,10 +545,9 @@
         totalPossible: totalPossible,
         timestamp: new Date().toISOString()
       };
-      // Send POST request to your Google Apps Script endpoint
       fetch(sheetURL, {
         method: "POST",
-        mode: "no-cors",  // "no-cors" may be necessary if no CORS headers are set on your endpoint
+        mode: "no-cors",
         headers: {
           "Content-Type": "application/json"
         },
