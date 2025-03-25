@@ -127,7 +127,7 @@
     const quizStartTime = new Date();
     const logEntries = []; // Full log for all questions
 
-    // Define all three questions. We want Q3 first.
+    // Define questions with Q3 first, then Q1, then Q2.
     const questions = (function() {
       // Q3: Barista Tasks Ordering
       const explanationQ3 = "You’re covering for a barista who left a voicemail:\n\n" +
@@ -178,7 +178,7 @@
         ]
       };
 
-      // Q2: Football Tournament Data (Canvas Drawings + Checkboxes)
+      // Q2: Football Tournament Data (Canvas + Checkboxes)
       const report1 = [
         ["Player#", "Goals", "KeyPass", "MotM?", "Bonus"],
         ["7", "2", "15", "yes", "A-2.5"],
@@ -209,7 +209,6 @@
         reports: { report1, report2 }
       };
 
-      // Return questions in order: Q3, then Q1, then Q2.
       return [q3, q1, q2];
     })();
 
@@ -245,7 +244,7 @@
       const qdata = questions[currentQuestionIndex];
       document.getElementById("timerDisplay").textContent = "Time: " + qdata.time;
 
-      // Build question UI
+      // Build question UI container
       const qElem = document.createElement("div");
       qElem.className = "question";
 
@@ -270,9 +269,9 @@
         qElem.appendChild(instr);
       }
 
-      // Render question based on type
+      // Render based on question type
       if (qdata.type === "ordering") {
-        // Ordering UI for Q3
+        // Ordering question UI (only for Q3)
         const orderingHeading = document.createElement("h4");
         orderingHeading.innerText = "Drag and drop the tasks in the correct order:";
         qElem.appendChild(orderingHeading);
@@ -283,7 +282,7 @@
         list.id = "orderingList";
         list.style.listStyleType = "none";
 
-        // Shuffle steps for random initial order
+        // Shuffle steps for a random initial order
         const shuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
         shuffled.forEach(step => {
           const li = document.createElement("li");
@@ -296,7 +295,7 @@
         listContainer.appendChild(list);
         qElem.appendChild(listContainer);
 
-        // Only call addDragAndDropHandlers() for ordering questions
+        // Only call addDragAndDropHandlers() when type is ordering
         addDragAndDropHandlers();
       }
       else if (qdata.type === "y_n_subq") {
@@ -305,10 +304,9 @@
           const subDiv = document.createElement("div");
           subDiv.className = "sub-question";
           const label = document.createElement("label");
-          label.innerText = subq.item + " | Paper: " + subq.paper + " | Screen: " + subq.screen;
+          label.innerText = `${subq.item} | Paper: ${subq.paper} | Screen: ${subq.screen}`;
           subDiv.appendChild(label);
           subDiv.appendChild(document.createElement("br"));
-
           // Y radio
           const radioY = document.createElement("input");
           radioY.type = "radio";
@@ -373,11 +371,11 @@
     }
 
     /***********************
-     * 4. Drag-and-Drop Handlers
+     * 4. Drag-and-Drop Handlers (Option A: Only call for ordering questions)
      ***********************/
     function addDragAndDropHandlers() {
       const list = document.getElementById("orderingList");
-      if (!list) return; // Ensure orderingList exists
+      if (!list) return;  // Only proceed if the element exists
       let dragSrcEl = null;
 
       function handleDragStart(e) {
@@ -492,7 +490,7 @@
       logEntries.push(logText);
       currentQuestionIndex++;
 
-      // Fade transition effect
+      // Fade transition effect before loading next question or ending quiz
       const quizSection = document.getElementById("quizSection");
       quizSection.style.opacity = 1;
       let fadeOut = setInterval(() => {
@@ -536,11 +534,11 @@
       document.getElementById("resultMessage").innerText = finalScoreText;
       resultSection.style.display = "block";
       console.log("Quiz Completed! " + finalScoreText);
-      // Optionally send log to Google Sheet here if needed.
+      // Optionally: send log data to Google Sheets here.
     }
 
     /***********************
-     * 8. Helper Function: Array Equality
+     * 8. Helper: Array Equality
      ***********************/
     function arraysEqual(a, b) {
       return a.length === b.length && a.every((v, i) => v === b[i]);
