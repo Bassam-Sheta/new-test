@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Quiz Application</title>
+  <title>Q3-Only Styled Quiz</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,27 +43,13 @@
     .question {
       margin-bottom: 20px;
     }
-    .sub-question {
-      border-bottom: 1px solid #ddd;
-      padding: 8px 0;
-    }
-    .canvas-container {
-      display: flex;
-      justify-content: space-around;
-      margin: 10px 0;
-    }
-    canvas {
-      border: 1px solid #000;
-    }
-    .checkbox-group, .ordering-group {
-      margin: 10px 0;
-    }
     .ordering-group {
       border: 1px solid #aaa;
       padding: 10px;
       border-radius: 4px;
       background-color: #fff;
       min-height: 100px;
+      margin-top: 10px;
     }
     .ordering-item {
       padding: 8px;
@@ -88,8 +74,8 @@
     <!-- Start Dialog -->
     <div id="startDialog" class="start-dialog">
       <h2>Welcome to the Test</h2>
-      <p>Please note that this test is 10 minutes long in total.</p>
-      <input type="text" id="usernameInput" placeholder="Name please" />
+      <p>This version has only the barista tasks ordering question (Q3).</p>
+      <input type="text" id="usernameInput" placeholder="Enter your name" />
       <button id="startBtn" class="btn">Submit</button>
     </div>
     
@@ -122,62 +108,9 @@
     const quizStartTime = new Date();
     const logEntries = [];
 
-    // Define questions. Note that we now return [q3, q1, q2] so Q3 appears first.
+    // Q3 (Barista Tasks) as a single question in an array
     const questions = (function() {
-      // Q1: Global Client Audit (Y/N Sub-Questions)
-      const q1 = {
-        // Optionally rename question text if desired
-        question: "Question 2: Global Client Audit",
-        instructions: "Mark Y (Match) or N (Mismatch) for each sub-item.",
-        type: "y_n_subq",
-        time: 120,
-        sub_questions: [
-          { item: "Client Name", paper: "Dr. Emília Rodríguez-Sánchez", screen: "Dr. Emilía Rodriguez-Sanchez", correct: "N" },
-          { item: "Account ID", paper: "#AC-2023-0I9B4Q", screen: "#AC-2023-0I9B4Q", correct: "Y" },
-          { item: "Invoice Date", paper: "10.04.2024", screen: "10/04/2024", correct: "N" },
-          { item: "Email", paper: "support@corpα.com (Greek α)", screen: "support@corpα.com", correct: "Y" },
-          { item: "SWIFT Code", paper: "DEUTDEDB380", screen: "DEUTDEDB3B0", correct: "N" },
-          { item: "Address", paper: "45 Rue de la Paix, 7500₂, Paris", screen: "45 Rue de la Paix, 7500₂, Paris", correct: "Y" },
-          { item: "Contract Value", paper: "¥12,345,678.90", screen: "¥12.345.678,90", correct: "N" },
-          { item: "Payment Ref", paper: "TXN-ID: 8S2G7HJKᴮᴺ", screen: "TXN-ID: 8S2G7HJKᴮᴺ", correct: "Y" },
-          { item: "Tax Code", paper: "IT-001234567-9", screen: "IT-0012345b7-9", correct: "N" },
-          { item: "IBAN", paper: "GB29NWBK60161331926819", screen: "GB29NWBK60161331926819", correct: "Y" },
-          { item: "Phone", paper: "+33 1 70 22 18 76", screen: "+33 1 70 22 81 76", correct: "N" },
-          { item: "Delivery Code", paper: "DPD#XQ-ΓΤΨ-2024", screen: "DPD#XQ-ΓΤΦ-2024", correct: "N" }
-        ]
-      };
-
-      // Q2: Football Tournament Data (Canvas drawings + checkboxes)
-      const report1 = [
-        ["Player#", "Goals", "KeyPass", "MotM?", "Bonus"],
-        ["7", "2", "15", "yes", "A-2.5"],
-        ["10", "5", "22", "no", "B-3"],
-        ["12", "9", "28", "yes", "C-7"],
-        ["15", "4", "20", "no", "D-2"],
-        ["18", "7", "31", "yes", "E-5"],
-        ["21", "10", "25", "no", "F-3"],
-        ["24", "12", "20", "yes", "G-4"]
-      ];
-      const report2 = [
-        ["Player#", "MotM?", "Bonus", "Goals", "KeyPass"],
-        ["7", "yes", "A-2.5", "2", "15"],
-        ["10", "no", "B-3", "6", "22"],
-        ["12", "yes", "C-7", "8", "28"],
-        ["15", "no", "D-2", "4", "20"],
-        ["18", "yes", "E-5", "7", "31"],
-        ["21", "no", "F-3", "10", "25"],
-        ["24", "yes", "G-4,0", "12", "20"]
-      ];
-      const q2 = {
-        question: "Question 3: Football Tournament Data\n\nBelow are two reports showing performance data for 7 players.\nSelect the players with inconsistent data.",
-        type: "checkbox_image",
-        time: 240,
-        options: ["7", "10", "12", "15", "18", "21", "24"],
-        correct_indices: [1, 2, 4, 6],
-        reports: { report1, report2 }
-      };
-
-      // Q3: Barista Tasks Ordering (Drag-and-Drop)
+      // The barista tasks ordering question
       const steps = [
         "Unlock drawer (code: 1122)",
         "Check delivery slip",
@@ -190,23 +123,18 @@
         "Send summary text"
       ];
       const q3 = {
-        question: "Question 1: Barista Tasks Ordering\n\nDrag and drop the tasks in the correct order:",
+        question: "Barista Tasks Ordering (Single-Question Demo)",
         type: "ordering",
-        time: 270,
+        time: 270,  // 4.5 minutes
         steps: steps
       };
-
-      // Return with Q3 first, Q1 second, Q2 third.
-      return [q3, q1, q2];
+      // Return just Q3 in the array
+      return [q3];
     })();
 
     // ---------------------------
-    // 2. Utility & Timer Functions
+    // 2. Utility & Timer
     // ---------------------------
-    function arraysEqual(a, b) {
-      return a.length === b.length && a.every((v, i) => v === b[i]);
-    }
-
     function startTimer(duration, display, onTimeUp) {
       remainingTime = duration;
       display.textContent = "Time: " + remainingTime;
@@ -227,151 +155,63 @@
       clearInterval(timerInterval);
       const questionContainer = document.getElementById("questionContainer");
       questionContainer.innerHTML = "";
+
+      // If we've passed the only question, end
       if (currentQuestionIndex >= questions.length) {
         endQuiz();
         return;
       }
+
       const qdata = questions[currentQuestionIndex];
       document.getElementById("timerDisplay").textContent = "Time: " + qdata.time;
-      
+
       // Build question UI
       const qElem = document.createElement("div");
       qElem.className = "question";
       const qTitle = document.createElement("h3");
       qTitle.innerText = qdata.question;
       qElem.appendChild(qTitle);
-      
-      if (qdata.instructions) {
-        const instr = document.createElement("p");
-        instr.innerText = qdata.instructions;
-        qElem.appendChild(instr);
-      }
 
-      if (qdata.type === "y_n_subq") {
-        qdata.sub_questions.forEach((subq, idx) => {
-          const subDiv = document.createElement("div");
-          subDiv.className = "sub-question";
-          const label = document.createElement("label");
-          label.innerText = subq.item + " | Paper: " + subq.paper + " | Screen: " + subq.screen;
-          subDiv.appendChild(label);
-          subDiv.appendChild(document.createElement("br"));
-          // Y radio
-          const radioY = document.createElement("input");
-          radioY.type = "radio";
-          radioY.name = "subq" + idx;
-          radioY.value = "Y";
-          const labelY = document.createElement("label");
-          labelY.innerText = " Y ";
-          // N radio
-          const radioN = document.createElement("input");
-          radioN.type = "radio";
-          radioN.name = "subq" + idx;
-          radioN.value = "N";
-          const labelN = document.createElement("label");
-          labelN.innerText = " N ";
-          subDiv.appendChild(radioY); 
-          subDiv.appendChild(labelY);
-          subDiv.appendChild(radioN); 
-          subDiv.appendChild(labelN);
-          qElem.appendChild(subDiv);
-        });
-      } 
-      else if (qdata.type === "checkbox_image") {
-        // Create two canvases
-        const canvasContainer = document.createElement("div");
-        canvasContainer.className = "canvas-container";
-        const canvas1 = document.createElement("canvas");
-        canvas1.id = "canvas1";
-        canvas1.width = 400;
-        canvas1.height = 200;
-        const canvas2 = document.createElement("canvas");
-        canvas2.id = "canvas2";
-        canvas2.width = 400;
-        canvas2.height = 200;
-        canvasContainer.appendChild(canvas1);
-        canvasContainer.appendChild(canvas2);
-        qElem.appendChild(canvasContainer);
-        // Create checkboxes for options
-        const cbGroup = document.createElement("div");
-        cbGroup.className = "checkbox-group";
-        qdata.options.forEach((option, idx) => {
-          const cbLabel = document.createElement("label");
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.value = idx;
-          cbLabel.appendChild(checkbox);
-          cbLabel.appendChild(document.createTextNode(" " + option));
-          cbGroup.appendChild(cbLabel);
-          cbGroup.appendChild(document.createElement("br"));
-        });
-        qElem.appendChild(cbGroup);
-        // Delay drawing to ensure canvases are rendered
-        setTimeout(() => {
-          console.log("Drawing canvas1:", document.getElementById("canvas1"));
-          drawTable("canvas1", qdata.reports.report1);
-          console.log("Drawing canvas2:", document.getElementById("canvas2"));
-          drawTable("canvas2", qdata.reports.report2);
-        }, 500);
-      } 
-      else if (qdata.type === "ordering") {
-        // Create a heading for ordering question
-        const orderingHeading = document.createElement("h4");
-        orderingHeading.innerText = "Drag and drop the tasks in the correct order:";
-        qElem.appendChild(orderingHeading);
-        const listContainer = document.createElement("div");
-        listContainer.className = "ordering-group";
-        const list = document.createElement("ul");
-        list.id = "orderingList";
-        list.style.listStyleType = "none";
-        // Shuffle steps for random order
-        const shuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
-        shuffled.forEach(step => {
-          const li = document.createElement("li");
-          li.innerText = step;
-          li.className = "ordering-item";
-          li.draggable = true;
-          list.appendChild(li);
-        });
-        listContainer.appendChild(list);
-        qElem.appendChild(listContainer);
-        addDragAndDropHandlers();
-      }
-      
+      // Because it's the only question, we know it's ordering
+      const orderingHeading = document.createElement("h4");
+      orderingHeading.innerText = "Drag and drop the tasks in the correct order:";
+      qElem.appendChild(orderingHeading);
+
+      const listContainer = document.createElement("div");
+      listContainer.className = "ordering-group";
+
+      const list = document.createElement("ul");
+      list.id = "orderingList";
+      list.style.listStyleType = "none";
+
+      // Shuffle steps for random initial order
+      const shuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
+      shuffled.forEach(step => {
+        const li = document.createElement("li");
+        li.innerText = step;
+        li.className = "ordering-item";
+        li.draggable = true;
+        list.appendChild(li);
+      });
+
+      listContainer.appendChild(list);
+      qElem.appendChild(listContainer);
       questionContainer.appendChild(qElem);
+
+      // Add drag/drop logic
+      addDragAndDropHandlers();
+
+      // Start the timer
       startTimer(qdata.time, document.getElementById("timerDisplay"), () => submitAnswer(true));
     }
 
     // ---------------------------
-    // 4. Canvas Drawing Function
-    // ---------------------------
-    function drawTable(canvasId, data) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas) {
-        console.log("Canvas not found: " + canvasId);
-        return;
-      }
-      const ctx = canvas.getContext("2d");
-      const cellW = 80, cellH = 25;
-      ctx.fillStyle = "#FFFFFF";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "10px Arial";
-      ctx.strokeStyle = "#000000";
-      for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < data[i].length; j++) {
-          const x = j * cellW, y = i * cellH;
-          ctx.strokeRect(x, y, cellW, cellH);
-          ctx.fillStyle = "#000000";
-          ctx.fillText(data[i][j], x + 3, y + 17);
-        }
-      }
-    }
-
-    // ---------------------------
-    // 5. Drag-and-Drop Handlers for Ordering
+    // 4. Drag-and-Drop
     // ---------------------------
     function addDragAndDropHandlers() {
       const list = document.getElementById("orderingList");
       let dragSrcEl = null;
+
       function handleDragStart(e) {
         dragSrcEl = this;
         e.dataTransfer.effectAllowed = "move";
@@ -401,6 +241,7 @@
         const items = list.querySelectorAll(".ordering-item");
         items.forEach(item => item.classList.remove("drag-over"));
       }
+
       const items = list.querySelectorAll(".ordering-item");
       items.forEach(item => {
         item.addEventListener("dragstart", handleDragStart, false);
@@ -413,7 +254,7 @@
     }
 
     // ---------------------------
-    // 6. Submission and Quiz End Functions
+    // 5. Submission and End
     // ---------------------------
     function submitAnswer(auto = false) {
       clearInterval(timerInterval);
@@ -421,50 +262,28 @@
       let subScore = 0;
       let totalSub = 0;
       let logText = "User: " + username + " | Q: " + qdata.question + "\n";
-      
-      if (qdata.type === "y_n_subq") {
-        qdata.sub_questions.forEach((subq, idx) => {
-          totalSub++;
-          const radios = document.getElementsByName("subq" + idx);
-          let answer = null;
-          radios.forEach(r => { if (r.checked) answer = r.value; });
-          logText += subq.item + " => user: " + (answer || "No answer") + ", correct: " + subq.correct + "\n";
-          if (answer === subq.correct) subScore++;
-        });
-        logText += "Score: " + subScore + " / " + totalSub + "\n";
-      } 
-      else if (qdata.type === "checkbox_image") {
-        totalSub = qdata.options.length;
-        const checkboxes = document.querySelectorAll(".checkbox-group input[type='checkbox']");
-        const userIndices = [];
-        checkboxes.forEach(cb => { if (cb.checked) userIndices.push(parseInt(cb.value)); });
-        logText += "User selected: " + userIndices + "\n";
-        logText += "Correct: " + qdata.correct_indices + "\n";
-        if (arraysEqual(userIndices.sort(), qdata.correct_indices.slice().sort())) {
-          subScore = totalSub;
-        }
-        logText += "Score: " + subScore + " / " + totalSub + "\n";
-      } 
-      else if (qdata.type === "ordering") {
-        const listItems = document.querySelectorAll("#orderingList li");
-        totalSub = listItems.length;
-        const userOrder = [];
-        listItems.forEach(li => userOrder.push(li.innerText));
-        logText += "User's order:\n";
-        userOrder.forEach((step, i) => {
-          logText += (i + 1) + ". " + step + "\n";
-        });
-        qdata.steps.forEach((correctStep, idx) => {
-          if (userOrder[idx] === correctStep) subScore++;
-        });
-        logText += "Score: " + subScore + " / " + totalSub + "\n";
-      }
-      
+
+      // Only one question, type=ordering
+      const listItems = document.querySelectorAll("#orderingList li");
+      totalSub = listItems.length;
+      const userOrder = [];
+      listItems.forEach(li => userOrder.push(li.innerText));
+      logText += "User's order:\n";
+      userOrder.forEach((step, i) => {
+        logText += (i + 1) + ". " + step + "\n";
+      });
+
+      // Compare with correct order
+      qdata.steps.forEach((correctStep, idx) => {
+        if (userOrder[idx] === correctStep) subScore++;
+      });
+      logText += "Score: " + subScore + " / " + totalSub + "\n";
+
       score += subScore;
       logEntries.push(logText);
       currentQuestionIndex++;
-      
-      // Fade transition effect
+
+      // Fade out, then load next (but there's no next)
       const quizSection = document.getElementById("quizSection");
       quizSection.style.opacity = 1;
       let fadeOut = setInterval(() => {
@@ -472,7 +291,7 @@
           quizSection.style.opacity -= 0.1;
         } else {
           clearInterval(fadeOut);
-          loadQuestion();
+          loadQuestion(); // Will trigger endQuiz() since we only have 1 question
           let fadeIn = setInterval(() => {
             if (quizSection.style.opacity < 1) {
               quizSection.style.opacity = parseFloat(quizSection.style.opacity) + 0.1;
@@ -483,23 +302,19 @@
         }
       }, 50);
     }
-    
+
     function skipQuestion() {
       clearInterval(timerInterval);
       currentQuestionIndex++;
       loadQuestion();
     }
-    
+
     function endQuiz() {
       clearInterval(timerInterval);
       document.getElementById("quizSection").style.display = "none";
       const resultSection = document.getElementById("resultSection");
-      const totalPossible = questions.reduce((acc, q) => {
-        if (q.type === "y_n_subq") return acc + q.sub_questions.length;
-        if (q.type === "checkbox_image") return acc + q.options.length;
-        if (q.type === "ordering") return acc + q.steps.length;
-        return acc;
-      }, 0);
+      // Score logic
+      const totalPossible = questions[0].steps.length;
       const finishTime = new Date();
       const details = "Start Time: " + quizStartTime.toLocaleString() + "\n" +
                       "End Time: " + finishTime.toLocaleString() + "\n" +
@@ -511,7 +326,7 @@
     }
 
     // ---------------------------
-    // 7. Event Listeners
+    // 6. Event Listeners
     // ---------------------------
     document.getElementById("startBtn").addEventListener("click", function() {
       const input = document.getElementById("usernameInput").value.trim();
@@ -524,6 +339,7 @@
       document.getElementById("quizSection").style.display = "block";
       loadQuestion();
     });
+
     document.getElementById("submitBtn").addEventListener("click", function() {
       submitAnswer(false);
     });
@@ -533,4 +349,3 @@
   </script>
 </body>
 </html>
-
