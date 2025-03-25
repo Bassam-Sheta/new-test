@@ -382,7 +382,9 @@
       function handleDragStart(e) {
         dragSrcEl = this;
         e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/html", this.innerHTML);
+        // Set a custom drag image so that the element appears under the cursor.
+        e.dataTransfer.setDragImage(this, 10, 10);
+        e.dataTransfer.setData("text/plain", this.innerText);
       }
       function handleDragOver(e) {
         if (e.preventDefault) e.preventDefault();
@@ -398,8 +400,10 @@
       function handleDrop(e) {
         if (e.stopPropagation) e.stopPropagation();
         if (dragSrcEl !== this) {
-          dragSrcEl.innerHTML = this.innerHTML;
-          this.innerHTML = e.dataTransfer.getData("text/html");
+          // Swap the inner text of the two items
+          let temp = dragSrcEl.innerText;
+          dragSrcEl.innerText = this.innerText;
+          this.innerText = temp;
         }
         return false;
       }
@@ -475,14 +479,13 @@
         logText += `Score: ${subScore} / ${totalSub}\n`;
       }
       else if (qdata.type === "checkbox_image") {
-        // For Q2, we want a maximum score of 4 (only 4 correct answers count).
-        totalSub = qdata.correct_indices.length; // 4
+        // For Q2, maximum score is 4.
+        totalSub = qdata.correct_indices.length;
         const checkboxes = document.querySelectorAll(".checkbox-group input[type='checkbox']");
         const userIndices = [];
         checkboxes.forEach(cb => { if (cb.checked) userIndices.push(parseInt(cb.value)); });
         logText += `User selected: ${userIndices}\n`;
         logText += `Correct: ${qdata.correct_indices}\n`;
-        // Award full 4 points only if user's selection matches exactly the correct indices
         if (arraysEqual(userIndices.sort(), qdata.correct_indices.slice().sort())) {
           subScore = totalSub;
         } else {
@@ -531,7 +534,7 @@
       const totalPossible = questions.reduce((acc, q) => {
         if (q.type === "ordering") return acc + q.steps.length;
         if (q.type === "y_n_subq") return acc + q.sub_questions.length;
-        if (q.type === "checkbox_image") return acc + q.correct_indices.length; // Only count 4 for Q2
+        if (q.type === "checkbox_image") return acc + q.correct_indices.length;
         return acc;
       }, 0);
       const finishTime = new Date();
@@ -568,3 +571,4 @@
   </script>
 </body>
 </html>
+
