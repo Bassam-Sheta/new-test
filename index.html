@@ -205,6 +205,7 @@
         type: "checkbox_image",
         time: 240,
         options: ["7", "10", "12", "15", "18", "21", "24"],
+        // For Q2, only 4 of the 7 options are correct.
         correct_indices: [1, 2, 4, 6],
         reports: { report1, report2 }
       };
@@ -474,14 +475,18 @@
         logText += `Score: ${subScore} / ${totalSub}\n`;
       }
       else if (qdata.type === "checkbox_image") {
-        totalSub = qdata.options.length;
+        // For Q2, we want a maximum score of 4 (only 4 correct answers count).
+        totalSub = qdata.correct_indices.length; // 4
         const checkboxes = document.querySelectorAll(".checkbox-group input[type='checkbox']");
         const userIndices = [];
         checkboxes.forEach(cb => { if (cb.checked) userIndices.push(parseInt(cb.value)); });
         logText += `User selected: ${userIndices}\n`;
         logText += `Correct: ${qdata.correct_indices}\n`;
+        // Award full 4 points only if user's selection matches exactly the correct indices
         if (arraysEqual(userIndices.sort(), qdata.correct_indices.slice().sort())) {
           subScore = totalSub;
+        } else {
+          subScore = 0;
         }
         logText += `Score: ${subScore} / ${totalSub}\n`;
       }
@@ -526,7 +531,7 @@
       const totalPossible = questions.reduce((acc, q) => {
         if (q.type === "ordering") return acc + q.steps.length;
         if (q.type === "y_n_subq") return acc + q.sub_questions.length;
-        if (q.type === "checkbox_image") return acc + q.options.length;
+        if (q.type === "checkbox_image") return acc + q.correct_indices.length; // Only count 4 for Q2
         return acc;
       }, 0);
       const finishTime = new Date();
