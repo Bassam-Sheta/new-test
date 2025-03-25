@@ -43,6 +43,11 @@
     .question {
       margin-bottom: 20px;
     }
+    .explanation {
+      font-size: 16px;
+      margin: 10px 0;
+      line-height: 1.4;
+    }
     .ordering-group {
       border: 1px solid #aaa;
       padding: 10px;
@@ -110,7 +115,15 @@
 
     // Q3 (Barista Tasks) as a single question in an array
     const questions = (function() {
-      // The barista tasks ordering question
+      // The full explanatory text from the voicemail
+      const explanationText = "You’re covering for a barista who left a voicemail:\n\n" +
+        "“Hey! Thanks for helping out. First, check today’s delivery slip—it’s in the top drawer (code: 1122). " +
+        "After restocking cups, check the whiteboard for custom orders. If there’s a ‘machine maintenance’ alert, " +
+        "prioritize it over custom orders. Once done, lock the cash register, refill the sugar jars, and text me a summary. " +
+        "Oh, and refill the sugar jars after locking up! Don’t forget!”\n\n" +
+        "Place the tasks in the correct order:";
+
+      // Barista tasks ordering question (Q3)
       const steps = [
         "Unlock drawer (code: 1122)",
         "Check delivery slip",
@@ -123,7 +136,8 @@
         "Send summary text"
       ];
       const q3 = {
-        question: "Barista Tasks Ordering (Single-Question Demo)",
+        question: "Barista Tasks Ordering",
+        explanation: explanationText,
         type: "ordering",
         time: 270,  // 4.5 minutes
         steps: steps
@@ -156,7 +170,7 @@
       const questionContainer = document.getElementById("questionContainer");
       questionContainer.innerHTML = "";
 
-      // If we've passed the only question, end
+      // If we've passed the only question, end quiz
       if (currentQuestionIndex >= questions.length) {
         endQuiz();
         return;
@@ -168,23 +182,33 @@
       // Build question UI
       const qElem = document.createElement("div");
       qElem.className = "question";
+
+      // Question title
       const qTitle = document.createElement("h3");
       qTitle.innerText = qdata.question;
       qElem.appendChild(qTitle);
 
-      // Because it's the only question, we know it's ordering
+      // Explanation paragraph (with newlines converted to breaks)
+      if (qdata.explanation) {
+        const expl = document.createElement("p");
+        expl.className = "explanation";
+        expl.innerText = qdata.explanation;
+        qElem.appendChild(expl);
+      }
+
+      // Ordering instructions heading
       const orderingHeading = document.createElement("h4");
       orderingHeading.innerText = "Drag and drop the tasks in the correct order:";
       qElem.appendChild(orderingHeading);
 
+      // Create ordering list container
       const listContainer = document.createElement("div");
       listContainer.className = "ordering-group";
-
       const list = document.createElement("ul");
       list.id = "orderingList";
       list.style.listStyleType = "none";
 
-      // Shuffle steps for random initial order
+      // Shuffle steps for a random initial order
       const shuffled = qdata.steps.slice().sort(() => Math.random() - 0.5);
       shuffled.forEach(step => {
         const li = document.createElement("li");
@@ -198,15 +222,15 @@
       qElem.appendChild(listContainer);
       questionContainer.appendChild(qElem);
 
-      // Add drag/drop logic
+      // Add drag-and-drop logic
       addDragAndDropHandlers();
 
-      // Start the timer
+      // Start timer for the question
       startTimer(qdata.time, document.getElementById("timerDisplay"), () => submitAnswer(true));
     }
 
     // ---------------------------
-    // 4. Drag-and-Drop
+    // 4. Drag-and-Drop Handlers
     // ---------------------------
     function addDragAndDropHandlers() {
       const list = document.getElementById("orderingList");
@@ -241,7 +265,6 @@
         const items = list.querySelectorAll(".ordering-item");
         items.forEach(item => item.classList.remove("drag-over"));
       }
-
       const items = list.querySelectorAll(".ordering-item");
       items.forEach(item => {
         item.addEventListener("dragstart", handleDragStart, false);
@@ -254,7 +277,7 @@
     }
 
     // ---------------------------
-    // 5. Submission and End
+    // 5. Submission and Quiz End Functions
     // ---------------------------
     function submitAnswer(auto = false) {
       clearInterval(timerInterval);
@@ -263,7 +286,7 @@
       let totalSub = 0;
       let logText = "User: " + username + " | Q: " + qdata.question + "\n";
 
-      // Only one question, type=ordering
+      // Only one question of type "ordering"
       const listItems = document.querySelectorAll("#orderingList li");
       totalSub = listItems.length;
       const userOrder = [];
@@ -273,7 +296,7 @@
         logText += (i + 1) + ". " + step + "\n";
       });
 
-      // Compare with correct order
+      // Compare with the correct order (as defined in qdata.steps)
       qdata.steps.forEach((correctStep, idx) => {
         if (userOrder[idx] === correctStep) subScore++;
       });
@@ -283,7 +306,7 @@
       logEntries.push(logText);
       currentQuestionIndex++;
 
-      // Fade out, then load next (but there's no next)
+      // Fade transition effect before ending quiz
       const quizSection = document.getElementById("quizSection");
       quizSection.style.opacity = 1;
       let fadeOut = setInterval(() => {
@@ -291,7 +314,7 @@
           quizSection.style.opacity -= 0.1;
         } else {
           clearInterval(fadeOut);
-          loadQuestion(); // Will trigger endQuiz() since we only have 1 question
+          loadQuestion();  // This will trigger endQuiz() since there's only one question
           let fadeIn = setInterval(() => {
             if (quizSection.style.opacity < 1) {
               quizSection.style.opacity = parseFloat(quizSection.style.opacity) + 0.1;
@@ -313,7 +336,6 @@
       clearInterval(timerInterval);
       document.getElementById("quizSection").style.display = "none";
       const resultSection = document.getElementById("resultSection");
-      // Score logic
       const totalPossible = questions[0].steps.length;
       const finishTime = new Date();
       const details = "Start Time: " + quizStartTime.toLocaleString() + "\n" +
