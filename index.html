@@ -80,6 +80,10 @@
     .drag-over {
       border: 2px dashed #000;
     }
+    /* Add a dragging class for visual feedback */
+    .dragging {
+      opacity: 0.5;
+    }
     .timer {
       font-size: 26px;
       font-weight: bold;
@@ -93,7 +97,9 @@
     <!-- Start Dialog -->
     <div id="startDialog" class="start-dialog">
       <h2>Welcome to the Test</h2>
-      <p>Please note: The quiz has three parts. Q3 (Barista Tasks Ordering) will be shown first, followed by Q1 (Global Client Audit) and then Q2 (Football Tournament Data).</p>
+      <p>
+        Please note: The quiz has three parts. Q3 (Barista Tasks Ordering) will be shown first, followed by Q1 (Global Client Audit) and then Q2 (Football Tournament Data).
+      </p>
       <input type="text" id="usernameInput" placeholder="Enter your name" />
       <button id="startBtn" class="btn">Submit</button>
     </div>
@@ -289,7 +295,7 @@
           const li = document.createElement("li");
           li.innerText = step;
           li.className = "ordering-item";
-          li.draggable = true;
+          li.setAttribute("draggable", "true");
           list.appendChild(li);
         });
 
@@ -372,55 +378,63 @@
     }
 
     /***********************
-     * 4. Drag-and-Drop Handlers (Option A: Only call for ordering questions)
+     * 4. Drag-and-Drop Handlers (Only for ordering questions)
      ***********************/
     function addDragAndDropHandlers() {
       const list = document.getElementById("orderingList");
       if (!list) return;  // Only proceed if the element exists
-      let dragSrcEl = null;
-
-      function handleDragStart(e) {
-        dragSrcEl = this;
-        e.dataTransfer.effectAllowed = "move";
-        // Set a custom drag image so that the element appears under the cursor.
-        e.dataTransfer.setDragImage(this, 10, 10);
-        e.dataTransfer.setData("text/plain", this.innerText);
-      }
-      function handleDragOver(e) {
-        if (e.preventDefault) e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        return false;
-      }
-      function handleDragEnter(e) {
-        this.classList.add("drag-over");
-      }
-      function handleDragLeave(e) {
-        this.classList.remove("drag-over");
-      }
-      function handleDrop(e) {
-        if (e.stopPropagation) e.stopPropagation();
-        if (dragSrcEl !== this) {
-          // Swap the inner text of the two items
-          let temp = dragSrcEl.innerText;
-          dragSrcEl.innerText = this.innerText;
-          this.innerText = temp;
-        }
-        return false;
-      }
-      function handleDragEnd(e) {
-        this.classList.remove("drag-over");
-        const items = list.querySelectorAll(".ordering-item");
-        items.forEach(item => item.classList.remove("drag-over"));
-      }
       const items = list.querySelectorAll(".ordering-item");
       items.forEach(item => {
-        item.addEventListener("dragstart", handleDragStart, false);
-        item.addEventListener("dragenter", handleDragEnter, false);
-        item.addEventListener("dragover", handleDragOver, false);
-        item.addEventListener("dragleave", handleDragLeave, false);
-        item.addEventListener("drop", handleDrop, false);
-        item.addEventListener("dragend", handleDragEnd, false);
+        item.setAttribute("draggable", "true");
+        item.addEventListener("dragstart", dragStart, false);
+        item.addEventListener("dragover", dragOver, false);
+        item.addEventListener("dragenter", dragEnter, false);
+        item.addEventListener("dragleave", dragLeave, false);
+        item.addEventListener("drop", dragDrop, false);
+        item.addEventListener("dragend", dragEnd, false);
       });
+    }
+
+    function dragStart(e) {
+      this.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", this.innerText);
+      // Optionally, set a custom drag image
+      if (e.dataTransfer.setDragImage) {
+        e.dataTransfer.setDragImage(this, 10, 10);
+      }
+    }
+
+    function dragOver(e) {
+      e.preventDefault(); // Necessary. Allows us to drop.
+      e.dataTransfer.dropEffect = "move";
+      return false;
+    }
+
+    function dragEnter(e) {
+      this.classList.add("drag-over");
+    }
+
+    function dragLeave(e) {
+      this.classList.remove("drag-over");
+    }
+
+    function dragDrop(e) {
+      e.stopPropagation();
+      // Swap innerText of the dragged item and the drop target
+      const dragged = document.querySelector(".dragging");
+      if (dragged && dragged !== this) {
+        const temp = dragged.innerText;
+        dragged.innerText = this.innerText;
+        this.innerText = temp;
+      }
+      return false;
+    }
+
+    function dragEnd(e) {
+      this.classList.remove("dragging");
+      const items = document.querySelectorAll(".ordering-item");
+      items.forEach(item => item.classList.remove("drag-over"));
     }
 
     /***********************
@@ -479,7 +493,7 @@
         logText += `Score: ${subScore} / ${totalSub}\n`;
       }
       else if (qdata.type === "checkbox_image") {
-        // For Q2, maximum score is 4.
+        // For Q2, we want a maximum score of 4.
         totalSub = qdata.correct_indices.length;
         const checkboxes = document.querySelectorAll(".checkbox-group input[type='checkbox']");
         const userIndices = [];
@@ -571,4 +585,3 @@
   </script>
 </body>
 </html>
-
